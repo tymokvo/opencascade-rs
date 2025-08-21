@@ -1,6 +1,5 @@
 use super::{face::Face, solid::Solid};
 use cxx::UniquePtr;
-use glam::DVec3;
 use opencascade_sys::ffi;
 
 pub struct HalfSpace {
