@@ -707,6 +707,17 @@ pub mod ffi {
         pub fn Build(self: Pin<&mut BRepPrimAPI_MakeTorus>, progress: &Message_ProgressRange);
         pub fn IsDone(self: &BRepPrimAPI_MakeTorus) -> bool;
 
+        // HalfSpace
+        type BRepPrimAPI_MakeHalfSpace;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepPrimAPI_MakeHalfSpace_ctor(
+            face: &TopoDS_Face,
+            positive_point: &gp_Pnt,
+        ) -> UniquePtr<BRepPrimAPI_MakeHalfSpace>;
+
+        pub fn Solid(self: &BRepPrimAPI_MakeHalfSpace) -> &TopoDS_Solid;
+
         // BRepLib
         pub fn BRepLibBuildCurves3d(shape: &TopoDS_Shape) -> bool;
 
