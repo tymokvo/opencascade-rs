@@ -1,5 +1,6 @@
 #[cxx::bridge]
 pub mod ffi {
+
     #[repr(u32)]
     #[derive(Debug)]
     pub enum TopAbs_ShapeEnum {
@@ -60,6 +61,15 @@ pub mod ffi {
         GeomAbs_Arc,
         GeomAbs_Tangent,
         GeomAbs_Intersection,
+    }
+
+    #[repr(u32)]
+    #[derive(Debug)]
+    pub enum TopAbs_State {
+        TopAbs_IN,
+        TopAbs_OUT,
+        TopAbs_ON,
+        TopAbs_UNKNOWN,
     }
 
     unsafe extern "C++" {
@@ -1414,6 +1424,17 @@ pub mod ffi {
         type BRepBndLib;
 
         pub fn BRepBndLib_Add(shape: &TopoDS_Shape, bb: Pin<&mut Bnd_Box>, use_triangulation: bool);
+
+        // BRepClass3D
+        type TopAbs_State;
+        type BRepClass3d_SolidClassifier;
+
+        #[cxx_name = "construct_unique"]
+        pub fn BRepClass3d_SolidClassifier_ctor() -> UniquePtr<BRepClass3d_SolidClassifier>;
+
+        pub fn Load(self: Pin<&mut BRepClass3d_SolidClassifier>, shape: &TopoDS_Shape);
+        pub fn Perform(self: Pin<&mut BRepClass3d_SolidClassifier>, point: &gp_Pnt, tolerance: f64);
+        pub fn State(self: &BRepClass3d_SolidClassifier) -> TopAbs_State;
     }
 }
 
