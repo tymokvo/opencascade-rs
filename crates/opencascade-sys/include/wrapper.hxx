@@ -14,6 +14,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepBuilderAPI_Transform.hxx>
+#include <BRepClass3d_SolidClassifier.hxx>
 #include <BRepFeat_MakeCylindricalHole.hxx>
 #include <BRepFeat_MakeDPrism.hxx>
 #include <BRepFilletAPI_MakeChamfer.hxx>
@@ -33,6 +34,7 @@
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrimAPI_MakeCone.hxx>
 #include <BRepPrimAPI_MakeCylinder.hxx>
+#include <BRepPrimAPI_MakeHalfSpace.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepPrimAPI_MakeRevol.hxx>
 #include <BRepPrimAPI_MakeSphere.hxx>
@@ -71,6 +73,7 @@
 #include <TColgp_Array1OfDir.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TopAbs_ShapeEnum.hxx>
+#include <TopAbs_State.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopoDS.hxx>
