@@ -6,7 +6,6 @@ mod boolean_shape;
 mod compound;
 mod edge;
 mod face;
-mod half_space;
 mod shape;
 mod shell;
 mod solid;
