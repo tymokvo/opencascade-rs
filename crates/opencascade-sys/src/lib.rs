@@ -1458,6 +1458,9 @@ pub mod ffi {
         #[cxx_name = "construct_unique"]
         pub fn HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
         pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
+        pub fn HLRBRep_Algo_Projector(algo: &Handle_HLRBRep_Algo, projector: &HLRAlgo_Projector);
+        pub fn HLRBRep_Algo_Update(algo: &Handle_HLRBRep_Algo);
+        pub fn HLRBRep_Algo_Hide(algo: &Handle_HLRBRep_Algo);
 
         type HLRAlgo_Projector;
         #[cxx_name = "construct_unique"]
