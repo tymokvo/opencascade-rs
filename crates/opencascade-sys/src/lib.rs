@@ -1461,6 +1461,7 @@ pub mod ffi {
         type Handle_HLRBRep_Algo;
         #[cxx_name = "construct_unique"]
         pub fn HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
+        pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
 
         type HLRBRep_HLRToShape;
         #[cxx_name = "construct_unique"]

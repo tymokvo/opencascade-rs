@@ -122,8 +122,6 @@ typedef opencascade::handle<Law_Function> HandleLawFunction;
 
 typedef opencascade::handle<TColgp_HArray1OfPnt> Handle_TColgpHArray1OfPnt;
 
-typedef opencascade::handle<HLRBRep_Algo> Handle_HLRBRep_Algo;
-
 inline std::unique_ptr<Handle_TColgpHArray1OfPnt>
 new_HandleTColgpHArray1OfPnt_from_TColgpHArray1OfPnt(std::unique_ptr<TColgp_HArray1OfPnt> array) {
   return std::unique_ptr<Handle_TColgpHArray1OfPnt>(new Handle_TColgpHArray1OfPnt(array.release()));
@@ -549,3 +547,9 @@ inline std::unique_ptr<gp_Pnt> Bnd_Box_CornerMax(const Bnd_Box &box) {
 inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standard_Boolean useTriangulation) {
   BRepBndLib::Add(shape, box, useTriangulation);
 }
+
+// HLRAlgo
+
+typedef opencascade::handle<HLRBRep_Algo> Handle_HLRBRep_Algo;
+
+inline void HLRBRep_Algo_Add(const Handle_HLRBRep_Algo &algo, const TopoDS_Shape &s) { return algo.get()->Add(s); }
