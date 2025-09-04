@@ -1451,6 +1451,22 @@ pub mod ffi {
         pub fn Load(self: Pin<&mut BRepClass3d_SolidClassifier>, shape: &TopoDS_Shape);
         pub fn Perform(self: Pin<&mut BRepClass3d_SolidClassifier>, point: &gp_Pnt, tolerance: f64);
         pub fn State(self: &BRepClass3d_SolidClassifier) -> TopAbs_State;
+
+        // HLRBrep
+        // Shape -> Plane projection
+        type HLRAlgo_Projector;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRAlgo_Projector_ctor() -> UniquePtr<HLRAlgo_Projector>;
+
+        type Handle_HLRBRep_Algo;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
+
+        type HLRBRep_HLRToShape;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRBRep_HLRToShape_ctor(
+            hlr_algo: &Handle_HLRBRep_Algo,
+        ) -> UniquePtr<HLRBRep_HLRToShape>;
     }
 }
 
