@@ -1454,6 +1454,11 @@ pub mod ffi {
 
         // HLRBrep
         // Shape -> Plane projection
+        type Handle_HLRBRep_Algo;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
+        pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
+
         type HLRAlgo_Projector;
         #[cxx_name = "construct_unique"]
         pub fn HLRAlgo_Projector_from_ax2(
@@ -1465,11 +1470,6 @@ pub mod ffi {
             use_perspective: bool,
             focal_length: f64,
         ) -> UniquePtr<HLRAlgo_Projector>;
-
-        type Handle_HLRBRep_Algo;
-        #[cxx_name = "construct_unique"]
-        pub fn HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
-        pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
 
         type HLRBRep_HLRToShape;
         #[cxx_name = "construct_unique"]
