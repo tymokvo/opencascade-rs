@@ -1456,7 +1456,15 @@ pub mod ffi {
         // Shape -> Plane projection
         type HLRAlgo_Projector;
         #[cxx_name = "construct_unique"]
-        pub fn HLRAlgo_Projector_ctor() -> UniquePtr<HLRAlgo_Projector>;
+        pub fn HLRAlgo_Projector_from_ax2(
+            coordinate_system: &gp_Ax2,
+        ) -> UniquePtr<HLRAlgo_Projector>;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRAlgo_Projector_from_trsf(
+            transform: &gp_Trsf,
+            use_perspective: bool,
+            focal_length: f64,
+        ) -> UniquePtr<HLRAlgo_Projector>;
 
         type Handle_HLRBRep_Algo;
         #[cxx_name = "construct_unique"]
