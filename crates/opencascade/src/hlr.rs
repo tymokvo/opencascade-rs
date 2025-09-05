@@ -7,6 +7,7 @@ pub enum EdgeType {
     Undefined,
     IsoLine,
     OutLine,
+    // TODO: Consider naming these explicitly
     Rg1Line,
     RgNLine,
     Sharp,
