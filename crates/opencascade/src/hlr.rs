@@ -77,15 +77,7 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = project(
-            &c,
-            [
-                //
-                (EdgeType::Sharp, EdgeVis::V),
-                (EdgeType::OutLine, EdgeVis::V),
-            ],
-            &glam::DMat4::IDENTITY,
-        );
+        let res = project(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY);
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
