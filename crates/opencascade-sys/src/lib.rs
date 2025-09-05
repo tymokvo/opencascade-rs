@@ -72,6 +72,17 @@ pub mod ffi {
         TopAbs_UNKNOWN,
     }
 
+    #[repr(u32)]
+    #[derive(Debug)]
+    pub enum HLRBRep_TypeOfResultingEdge {
+        HLRBRep_Undefined,
+        HLRBRep_IsoLine,
+        HLRBRep_OutLine,
+        HLRBRep_Rg1Line,
+        HLRBRep_RgNLine,
+        HLRBRep_Sharp,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -1475,12 +1486,19 @@ pub mod ffi {
         ) -> UniquePtr<HLRAlgo_Projector>;
 
         type HLRBRep_HLRToShape;
+        type HLRBRep_TypeOfResultingEdge;
         #[cxx_name = "construct_unique"]
         pub fn HLRBRep_HLRToShape_ctor(
             hlr_algo: &Handle_HLRBRep_Algo,
         ) -> UniquePtr<HLRBRep_HLRToShape>;
         pub fn HLRBRep_HLRToShape_VCompound(
             ts: Pin<&mut HLRBRep_HLRToShape>,
+        ) -> UniquePtr<TopoDS_Shape>;
+        pub fn HLRBRep_HLRToShape_CompoundOfEdges(
+            ts: Pin<&mut HLRBRep_HLRToShape>,
+            edge_type: HLRBRep_TypeOfResultingEdge,
+            visible: bool,
+            in_3d: bool,
         ) -> UniquePtr<TopoDS_Shape>;
     }
 }
