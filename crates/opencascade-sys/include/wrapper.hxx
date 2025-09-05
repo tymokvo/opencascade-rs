@@ -577,7 +577,6 @@ inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_
                                                                         const HLRBRep_TypeOfResultingEdge typ,
                                                                         const Standard_Boolean visible,
                                                                         const Standard_Boolean in3d) {
-  auto s = new TopoDS_Shape;
-  *s = ts.CompoundOfEdges(typ, visible, in3d);
-  return std::unique_ptr<TopoDS_Shape>(s);
+  auto s = ts.CompoundOfEdges(typ, visible, in3d);
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
 }

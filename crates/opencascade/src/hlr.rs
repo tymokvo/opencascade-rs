@@ -1,4 +1,4 @@
-use crate::primitives::{Compound, Shape};
+use crate::primitives::{Compound, IntoShape, Shape};
 use glam::DMat4;
 use opencascade_sys::ffi;
 
@@ -41,10 +41,19 @@ impl EdgeVis {
     }
 }
 
-pub fn project(
+/// Filter edges from the input shape that match the types and visibility when
+/// "viewed" by the input plane.
+///
+/// E.g. for a unit cube in +X,+Y,+Z and a plane at (-1, -1, -1) with (normalized)
+/// normal vector (1, 1, 1), filtered for "sharp, visible" edges, we would
+/// expect to see 9 edges:
+/// - 3 for the edges meeting at the origin (inner edges of 3 visible faces)
+/// - 6 for the outer edges of the 3 visible faces
+pub fn filter(
     shape: &Shape,
     edge_types: impl IntoIterator<Item = (EdgeType, EdgeVis)>,
     _plane: &DMat4,
+    project_edges_to_plane: bool,
 ) -> Shape {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
@@ -60,7 +69,12 @@ pub fn project(
     let mut shapes = vec![];
     for (typ, vis) in edge_types {
         let ts_pin = ts.pin_mut();
-        let res = ffi::HLRBRep_HLRToShape_CompoundOfEdges(ts_pin, typ.to_occ(), vis.to_occ(), true);
+        let res = ffi::HLRBRep_HLRToShape_CompoundOfEdges(
+            ts_pin,
+            typ.to_occ(),
+            vis.to_occ(),
+            !project_edges_to_plane,
+        );
         if !res.IsNull() {
             shapes.push(Shape::from_shape(&res));
         }
@@ -77,7 +91,7 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = project(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let res = filter(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
@@ -87,14 +101,14 @@ mod test {
         let c = Shape::cube(1.0);
 
         // A cube should have no outline as its edges are all sharp
-        let res = project(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let res = filter(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 0);
 
         let c = Shape::sphere(1.0).build();
 
         // A sphere should have a single, circular outline
-        let res = project(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let res = filter(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 1);
     }
