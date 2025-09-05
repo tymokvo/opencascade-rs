@@ -25,9 +25,25 @@ impl EdgeType {
     }
 }
 
+#[derive(Debug, PartialEq, Eq, Hash)]
+pub enum EdgeVis {
+    /// Edge is visible to the projection plane
+    V,
+    /// Edge is hidden from projection plane
+    H,
+}
+impl EdgeVis {
+    pub fn to_occ(&self) -> bool {
+        match &self {
+            Self::V => true,
+            Self::H => false,
+        }
+    }
+}
+
 pub fn project(
     shape: &Shape,
-    edge_types: impl IntoIterator<Item = EdgeType>,
+    edge_types: impl IntoIterator<Item = (EdgeType, EdgeVis)>,
     _plane: &DMat4,
 ) -> Shape {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
@@ -42,9 +58,9 @@ pub fn project(
 
     let mut ts = ffi::HLRBRep_HLRToShape_ctor(&algo);
     let mut shapes = vec![];
-    for edge_type in edge_types {
+    for (typ, vis) in edge_types {
         let res =
-            ffi::HLRBRep_HLRToShape_CompoundOfEdges(ts.pin_mut(), edge_type.to_occ(), true, true);
+            ffi::HLRBRep_HLRToShape_CompoundOfEdges(ts.pin_mut(), typ.to_occ(), vis.to_occ(), true);
         shapes.push(Shape::from_shape(&res));
     }
     Compound::from_shapes(shapes).into()
@@ -59,7 +75,7 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = project(&c, [EdgeType::Sharp], &glam::DMat4::IDENTITY);
+        let res = project(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY);
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
