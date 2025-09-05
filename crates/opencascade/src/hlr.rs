@@ -59,9 +59,11 @@ pub fn project(
     let mut ts = ffi::HLRBRep_HLRToShape_ctor(&algo);
     let mut shapes = vec![];
     for (typ, vis) in edge_types {
-        let res =
-            ffi::HLRBRep_HLRToShape_CompoundOfEdges(ts.pin_mut(), typ.to_occ(), vis.to_occ(), true);
-        shapes.push(Shape::from_shape(&res));
+        let ts_pin = ts.pin_mut();
+        let res = ffi::HLRBRep_HLRToShape_CompoundOfEdges(ts_pin, typ.to_occ(), vis.to_occ(), true);
+        if !res.IsNull() {
+            shapes.push(Shape::from_shape(&res));
+        }
     }
     Compound::from_shapes(shapes).into()
 }
@@ -75,7 +77,15 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = project(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let res = project(
+            &c,
+            [
+                //
+                (EdgeType::Sharp, EdgeVis::V),
+                (EdgeType::OutLine, EdgeVis::V),
+            ],
+            &glam::DMat4::IDENTITY,
+        );
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
