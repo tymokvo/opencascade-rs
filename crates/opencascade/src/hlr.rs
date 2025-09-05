@@ -3,7 +3,7 @@ use glam::DMat4;
 use opencascade_sys::ffi;
 
 pub fn project(shape: &Shape, _plane: &DMat4) -> Shape {
-    let algo = ffi::HLRBRep_Algo_ctor();
+    let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
     let proj = ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
         &ffi::new_point(0.0, 0.0, 0.0),
@@ -33,5 +33,7 @@ mod test {
         let c = Shape::cube(1.0);
 
         let res = project(&c, &glam::DMat4::IDENTITY);
+        let edges = res.edges().collect::<Vec<_>>();
+        assert!(edges.len() > 0);
     }
 }
