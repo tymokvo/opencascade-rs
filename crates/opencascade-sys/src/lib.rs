@@ -1479,6 +1479,9 @@ pub mod ffi {
         pub fn HLRBRep_HLRToShape_ctor(
             hlr_algo: &Handle_HLRBRep_Algo,
         ) -> UniquePtr<HLRBRep_HLRToShape>;
+        pub fn HLRBRep_HLRToShape_VCompound(
+            ts: Pin<&mut HLRBRep_HLRToShape>,
+        ) -> UniquePtr<TopoDS_Shape>;
     }
 }
 

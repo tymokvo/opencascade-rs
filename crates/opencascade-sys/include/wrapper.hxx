@@ -558,3 +558,9 @@ inline void HLRBRep_Algo_Projector(const Handle_HLRBRep_Algo &algo, const HLRAlg
 }
 inline void HLRBRep_Algo_Update(const Handle_HLRBRep_Algo &algo) { return algo.get()->Update(); }
 inline void HLRBRep_Algo_Hide(const Handle_HLRBRep_Algo &algo) { return algo.get()->Hide(); }
+
+inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_VCompound(HLRBRep_HLRToShape &ts) {
+  auto s = new TopoDS_Shape;
+  *s = ts.VCompound();
+  return std::unique_ptr<TopoDS_Shape>(s);
+}
