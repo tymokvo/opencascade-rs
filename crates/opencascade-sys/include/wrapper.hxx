@@ -552,7 +552,15 @@ inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standa
 
 typedef opencascade::handle<HLRBRep_Algo> Handle_HLRBRep_Algo;
 
-inline void HLRBRep_Algo_Add(const Handle_HLRBRep_Algo &algo, const TopoDS_Shape &s) { return algo.get()->Add(s); }
+inline std::unique_ptr<Handle_HLRBRep_Algo> Handle_HLRBRep_Algo_ctor() {
+  Handle(HLRBRep_Algo) hlr = new HLRBRep_Algo;
+  return std::unique_ptr<Handle_HLRBRep_Algo>(new Handle_HLRBRep_Algo(hlr));
+}
+
+inline void HLRBRep_Algo_Add(const Handle_HLRBRep_Algo &algo, const TopoDS_Shape &s) {
+  auto a = algo.get();
+  a->Add(s);
+}
 inline void HLRBRep_Algo_Projector(const Handle_HLRBRep_Algo &algo, const HLRAlgo_Projector &p) {
   return algo.get()->Projector(p);
 }
