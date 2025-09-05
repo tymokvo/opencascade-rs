@@ -81,4 +81,21 @@ mod test {
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
+
+    #[test]
+    fn project_outline() {
+        let c = Shape::cube(1.0);
+
+        // A cube should have no outline as its edges are all sharp
+        let res = project(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let edges = res.edges().collect::<Vec<_>>();
+        assert_eq!(edges.len(), 0);
+
+        let c = Shape::sphere(1.0).build();
+
+        // A sphere should have a single, circular outline
+        let res = project(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY);
+        let edges = res.edges().collect::<Vec<_>>();
+        assert_eq!(edges.len(), 1);
+    }
 }
