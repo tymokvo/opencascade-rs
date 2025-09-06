@@ -67,6 +67,7 @@
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
 #include <NCollection_Array2.hxx>
+#include <NCollection_Mat4.hxx>
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
@@ -580,3 +581,6 @@ inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_
   auto s = ts.CompoundOfEdges(typ, visible, in3d);
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
 }
+
+// gp_Trsf
+typedef NCollection_Mat4<Standard_Real> Mat4_Double;

@@ -1075,9 +1075,15 @@ pub mod ffi {
             a33: f64,
             a34: f64,
         );
+        pub fn GetMat4(self: &gp_Trsf, m: Pin<&mut Mat4_Double>);
 
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
+
+        type Mat4_Double;
+        #[cxx_name = "construct_unique"]
+        pub fn Mat4_Double_ctor() -> UniquePtr<Mat4_Double>;
+        pub fn GetValue(self: &Mat4_Double, row: usize, col: usize) -> f64;
 
         type gp_GTrsf;
         #[cxx_name = "construct_unique"]
@@ -1483,6 +1489,9 @@ pub mod ffi {
             use_perspective: bool,
             focal_length: f64,
         ) -> UniquePtr<HLRAlgo_Projector>;
+        pub fn Transformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
+        pub fn InvertedTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
+        pub fn FullTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
 
         type HLRBRep_HLRToShape;
         type HLRBRep_TypeOfResultingEdge;
