@@ -41,6 +41,11 @@ impl EdgeVis {
     }
 }
 
+pub enum PlaneType {
+    OriginNormal(DVec3, DVec3),
+    Matrix(DMat4),
+}
+
 /// Filter edges from the input shape that match the types and visibility when
 /// "viewed" by the input plane.
 ///
@@ -52,16 +57,20 @@ impl EdgeVis {
 pub fn filter(
     shape: &Shape,
     edge_types: impl IntoIterator<Item = (EdgeType, EdgeVis)>,
-    origin: &DVec3,
-    normal: &DVec3,
+    plane_type: &PlaneType,
     project_edges_to_plane: bool,
 ) -> Shape {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
-    let proj = ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
-        &ffi::new_point(origin.x, origin.y, origin.z),
-        &ffi::gp_Dir_ctor(normal.x, normal.y, normal.z),
-    ));
+    let proj = match plane_type {
+        PlaneType::OriginNormal(origin, normal) => {
+            ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
+                &ffi::new_point(origin.x, origin.y, origin.z),
+                &ffi::gp_Dir_ctor(normal.x, normal.y, normal.z),
+            ))
+        },
+        PlaneType::Matrix(_) => todo!(),
+    };
     ffi::HLRBRep_Algo_Projector(&algo, &proj);
     ffi::HLRBRep_Algo_Update(&algo);
     ffi::HLRBRep_Algo_Hide(&algo);
@@ -95,8 +104,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::Sharp, EdgeVis::V)],
-            &glam::DVec3::ZERO,
-            &glam::dvec3(1.0, 1.0, 1.0),
+            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();
@@ -111,8 +119,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
-            &glam::DVec3::ZERO,
-            &glam::dvec3(1.0, 1.0, 1.0),
+            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();
@@ -124,8 +131,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
-            &glam::DVec3::ZERO,
-            &glam::dvec3(1.0, 1.0, 1.0),
+            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();

@@ -1,5 +1,5 @@
 use opencascade::{
-    hlr::{self, EdgeType, EdgeVis},
+    hlr::{self, EdgeType, EdgeVis, PlaneType},
     primitives::{Compound, IntoShape, Shape},
 };
 
@@ -17,8 +17,7 @@ pub fn shape() -> Shape {
         let mut p = hlr::filter(
             &shape,
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
-            &o,
-            &n,
+            &PlaneType::OriginNormal(o, n),
             true,
         );
         p.set_global_translation(o);
