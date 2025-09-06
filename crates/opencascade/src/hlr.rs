@@ -44,7 +44,7 @@ impl EdgeVis {
     }
 }
 
-pub enum PlaneType {
+pub enum PlaneSpec {
     OriginNormal(DVec3, DVec3),
     Matrix(DMat4),
 }
@@ -60,19 +60,19 @@ pub enum PlaneType {
 pub fn filter(
     shape: &Shape,
     edge_types: impl IntoIterator<Item = (EdgeType, EdgeVis)>,
-    plane_type: &PlaneType,
+    plane_type: &PlaneSpec,
     project_edges_to_plane: bool,
 ) -> Shape {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
     let proj = match plane_type {
-        PlaneType::OriginNormal(origin, normal) => {
+        PlaneSpec::OriginNormal(origin, normal) => {
             ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
                 &ffi::new_point(origin.x, origin.y, origin.z),
                 &ffi::gp_Dir_ctor(normal.x, normal.y, normal.z),
             ))
         },
-        PlaneType::Matrix(m) => {
+        PlaneSpec::Matrix(m) => {
             let t = transform::gp_trsf(m);
             ffi::HLRAlgo_Projector_from_trsf(&t, false, 0.0)
         },
@@ -110,7 +110,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::Sharp, EdgeVis::V)],
-            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
+            &PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();
@@ -125,7 +125,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
-            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
+            &PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();
@@ -137,7 +137,7 @@ mod test {
         let res = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
-            &PlaneType::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
+            &PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::dvec3(1.0, 1.0, 1.0)),
             true,
         );
         let edges = res.edges().collect::<Vec<_>>();

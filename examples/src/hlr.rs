@@ -1,5 +1,5 @@
 use opencascade::{
-    hlr::{self, EdgeType, EdgeVis, PlaneType},
+    hlr::{self, EdgeType, EdgeVis, PlaneSpec},
     primitives::{Compound, IntoShape, Shape},
 };
 
@@ -12,7 +12,7 @@ pub fn shape() -> Shape {
 
     for p in [
         // PlaneType::OriginNormal(glam::dvec3(0.0, 0.0, 0.0), glam::dvec3(-1.0, 0.0, 0.0)),
-        PlaneType::Matrix(glam::dmat4(
+        PlaneSpec::Matrix(glam::dmat4(
             glam::dvec4(0.0, 1.0, 0.0, 0.0),
             glam::dvec4(0.0, 0.0, -1.0, 0.0),
             glam::dvec4(-1.0, 0.0, 0.0, 0.0),
