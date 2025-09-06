@@ -38,9 +38,17 @@ fn gizmo() -> Shape {
 }
 
 pub fn shape() -> Shape {
-    let c = Shape::cube(1.0);
-    let ls = Shape::sphere(0.5).at(glam::dvec3(1.0, 0.0, 1.0)).build();
-    let ss = Shape::sphere(0.25).at(glam::dvec3(0.0, 1.0, 1.0)).build();
+    let c = Workplane::xy()
+        .sketch()
+        .line_to(1.0, 0.0)
+        .line_to(1.0, 2.0)
+        .line_to(0.0, 2.0)
+        .close()
+        .to_face()
+        .extrude(glam::dvec3(0.0, 0.0, 3.0))
+        .into_shape();
+    let ls = Shape::sphere(0.5).at(glam::dvec3(1.0, 2.0, 3.0)).build();
+    let ss = Shape::sphere(0.25).at(glam::dvec3(0.0, 0.0, 3.0)).build();
     let shape = c.union(&ls).union(&ss).into_shape();
     let mut shapes: Vec<Shape> = vec![];
 
@@ -50,25 +58,7 @@ pub fn shape() -> Shape {
             glam::dvec4(0.0, 1.0, 0.0, 0.0),
             glam::dvec4(0.0, 0.0, -1.0, 0.0),
             glam::dvec4(-1.0, 0.0, 0.0, 0.0),
-            glam::dvec4(4.0, 0.0, 0.0, 1.0),
-        )),
-        PlaneSpec::Matrix(glam::dmat4(
-            glam::dvec4(0.0, 1.0, 0.0, 0.0),
-            glam::dvec4(0.0, 0.0, 1.0, 0.0),
-            glam::dvec4(1.0, 0.0, 0.0, 0.0),
-            glam::dvec4(6.0, 0.0, 0.0, 1.0),
-        )),
-        PlaneSpec::Matrix(glam::dmat4(
-            glam::dvec4(-1.0, 0.0, 0.0, 0.0),
-            glam::dvec4(0.0, 0.0, -1.0, 0.0),
-            glam::dvec4(0.0, -1.0, 0.0, 0.0),
-            glam::dvec4(0.0, 4.0, 0.0, 1.0),
-        )),
-        PlaneSpec::Matrix(glam::dmat4(
-            glam::dvec4(1.0, 0.0, 0.0, 0.0),
-            glam::dvec4(0.0, 0.0, -1.0, 0.0),
-            glam::dvec4(0.0, -1.0, 0.0, 0.0),
-            glam::dvec4(0.0, 6.0, 0.0, 1.0),
+            glam::dvec4(0.0, 0.0, 0.0, 1.0),
         )),
     ] {
         let p = hlr::filter(
