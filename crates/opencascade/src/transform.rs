@@ -28,7 +28,7 @@ pub fn gp_trsf(mat: &DMat4) -> UniquePtr<ffi::gp_Trsf> {
     t
 }
 
-pub fn dmat4(trsf: UniquePtr<ffi::gp_Trsf>) -> DMat4 {
+pub fn dmat4(trsf: &ffi::gp_Trsf) -> DMat4 {
     let mut m = ffi::Mat4_Double_ctor();
     trsf.GetMat4(m.pin_mut());
     let mut mat = glam::DMat4::ZERO;
@@ -77,7 +77,7 @@ mod test {
 
         let t = gp_trsf(&m);
 
-        let mm = dmat4(t);
+        let mm = dmat4(&t);
 
         assert_eq!(m, mm);
     }
