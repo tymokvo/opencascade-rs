@@ -1,5 +1,5 @@
 use crate::primitives::{Compound, IntoShape, Shape};
-use glam::DMat4;
+use glam::{DMat4, DVec3};
 use opencascade_sys::ffi;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -52,14 +52,15 @@ impl EdgeVis {
 pub fn filter(
     shape: &Shape,
     edge_types: impl IntoIterator<Item = (EdgeType, EdgeVis)>,
-    _plane: &DMat4,
+    origin: &DVec3,
+    normal: &DVec3,
     project_edges_to_plane: bool,
 ) -> Shape {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
     let proj = ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
-        &ffi::new_point(0.0, 0.0, 0.0),
-        &ffi::gp_Dir_ctor(1.0, 1.0, 1.0),
+        &ffi::new_point(origin.x, origin.y, origin.z),
+        &ffi::gp_Dir_ctor(normal.x, normal.y, normal.z),
     ));
     ffi::HLRBRep_Algo_Projector(&algo, &proj);
     ffi::HLRBRep_Algo_Update(&algo);
@@ -91,7 +92,13 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = filter(&c, [(EdgeType::Sharp, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
+        let res = filter(
+            &c,
+            [(EdgeType::Sharp, EdgeVis::V)],
+            &glam::DVec3::ZERO,
+            &glam::dvec3(1.0, 1.0, 1.0),
+            true,
+        );
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 9);
     }
@@ -101,14 +108,26 @@ mod test {
         let c = Shape::cube(1.0);
 
         // A cube should have no outline as its edges are all sharp
-        let res = filter(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
+        let res = filter(
+            &c,
+            [(EdgeType::OutLine, EdgeVis::V)],
+            &glam::DVec3::ZERO,
+            &glam::dvec3(1.0, 1.0, 1.0),
+            true,
+        );
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 0);
 
         let c = Shape::sphere(1.0).build();
 
         // A sphere should have a single, circular outline
-        let res = filter(&c, [(EdgeType::OutLine, EdgeVis::V)], &glam::DMat4::IDENTITY, true);
+        let res = filter(
+            &c,
+            [(EdgeType::OutLine, EdgeVis::V)],
+            &glam::DVec3::ZERO,
+            &glam::dvec3(1.0, 1.0, 1.0),
+            true,
+        );
         let edges = res.edges().collect::<Vec<_>>();
         assert_eq!(edges.len(), 1);
     }
