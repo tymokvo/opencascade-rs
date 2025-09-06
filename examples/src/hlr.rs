@@ -10,19 +10,24 @@ pub fn shape() -> Shape {
     let shape = c.union(&ls).union(&ss).into_shape();
     let mut shapes: Vec<Shape> = vec![];
 
-    for (o, n) in [
-        (glam::dvec3(0.0, 0.0, 2.0), glam::dvec3(0.0, 0.0, 1.0)),
-        (glam::dvec3(0.0, 0.0, -2.0), glam::dvec3(0.0, 0.0, -1.0)),
+    for p in [
+        // PlaneType::OriginNormal(glam::dvec3(0.0, 0.0, 0.0), glam::dvec3(-1.0, 0.0, 0.0)),
+        PlaneType::Matrix(glam::dmat4(
+            glam::dvec4(0.0, 1.0, 0.0, 0.0),
+            glam::dvec4(0.0, 0.0, -1.0, 0.0),
+            glam::dvec4(-1.0, 0.0, 0.0, 0.0),
+            glam::dvec4(0.0, 0.0, 0.0, 1.0),
+        )),
     ] {
-        let mut p = hlr::filter(
+        let p = hlr::filter(
             &shape,
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
-            &PlaneType::OriginNormal(o, n),
+            &p,
             true,
         );
-        p.set_global_translation(o);
         shapes.push(p);
     }
+
     shapes.push(shape);
     Compound::from_shapes(shapes).into()
 }

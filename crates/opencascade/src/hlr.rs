@@ -1,4 +1,7 @@
-use crate::primitives::{Compound, IntoShape, Shape};
+use crate::{
+    primitives::{Compound, Shape},
+    transform,
+};
 use glam::{DMat4, DVec3};
 use opencascade_sys::ffi;
 
@@ -69,7 +72,10 @@ pub fn filter(
                 &ffi::gp_Dir_ctor(normal.x, normal.y, normal.z),
             ))
         },
-        PlaneType::Matrix(_) => todo!(),
+        PlaneType::Matrix(m) => {
+            let t = transform::gp_trsf(m);
+            ffi::HLRAlgo_Projector_from_trsf(&t, false, 0.0)
+        },
     };
     ffi::HLRBRep_Algo_Projector(&algo, &proj);
     ffi::HLRBRep_Algo_Update(&algo);
