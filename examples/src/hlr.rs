@@ -52,28 +52,14 @@ pub fn shape() -> Shape {
     let shape = c.union(&ls).union(&ss).into_shape();
     let mut shapes: Vec<Shape> = vec![];
 
-    for ps in [
-        // PlaneType::OriginNormal(glam::dvec3(0.0, 0.0, 0.0), glam::dvec3(-1.0, 0.0, 0.0)),
-        PlaneSpec::Matrix(glam::dmat4(
-            glam::dvec4(0.0, 1.0, 0.0, 0.0),
-            glam::dvec4(0.0, 0.0, -1.0, 0.0),
-            glam::dvec4(-1.0, 0.0, 0.0, 0.0),
-            glam::dvec4(0.0, 0.0, 0.0, 1.0),
-        )),
-    ] {
+    for ps in [PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::DVec3::Z)] {
         let p = hlr::filter(
             &shape,
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
             &ps,
             true,
         );
-        shapes.push(p);
-        match ps {
-            PlaneSpec::Matrix(m) => {
-                shapes.push(gizmo().transform(&m));
-            },
-            _ => {},
-        }
+        shapes.push(p.transform(&glam::DMat4::from_translation(glam::dvec3(0.0, 0.0, -1.0))));
     }
 
     shapes.push(shape);
