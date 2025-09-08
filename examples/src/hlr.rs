@@ -88,7 +88,7 @@ pub fn shape() -> Shape {
             [1.5, 2.5 + 1.0, 0.0, 1.0],
         ]),
     ] {
-        let p = hlr::filter(
+        let (_, p) = hlr::filter(
             &shape.transform(&tr.inverse()),
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
             &glam::DVec3::ZERO,

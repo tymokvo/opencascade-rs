@@ -1,5 +1,8 @@
-use crate::primitives::{Compound, Shape};
-use glam::DVec3;
+use crate::{
+    primitives::{Compound, Shape},
+    transform,
+};
+use glam::{DMat4, DVec3};
 use opencascade_sys::ffi;
 
 #[derive(Debug, PartialEq, Eq, Hash)]
@@ -55,7 +58,7 @@ pub fn filter(
     plane_origin: &DVec3,
     plane_normal: &DVec3,
     project_edges_to_plane: bool,
-) -> Shape {
+) -> (DMat4, Shape) {
     let algo = ffi::Handle_HLRBRep_Algo_ctor();
     ffi::HLRBRep_Algo_Add(&algo, &shape.inner);
     let proj = ffi::HLRAlgo_Projector_from_ax2(&ffi::gp_Ax2_ctor(
@@ -81,7 +84,7 @@ pub fn filter(
             shapes.push(Shape::from_shape(&res));
         }
     }
-    Compound::from_shapes(shapes).into()
+    (transform::dmat4(proj.FullTransformation()), Compound::from_shapes(shapes).into())
 }
 
 #[cfg(test)]
@@ -93,7 +96,7 @@ mod test {
     fn project_simple() {
         let c = Shape::cube(1.0);
 
-        let res = filter(
+        let (_, res) = filter(
             &c,
             [(EdgeType::Sharp, EdgeVis::V)],
             &glam::DVec3::ZERO,
@@ -109,7 +112,7 @@ mod test {
         let c = Shape::cube(1.0);
 
         // A cube should have no outline as its edges are all sharp
-        let res = filter(
+        let (_, res) = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
             &glam::DVec3::ZERO,
@@ -122,7 +125,7 @@ mod test {
         let c = Shape::sphere(1.0).build();
 
         // A sphere should have a single, circular outline
-        let res = filter(
+        let (_, res) = filter(
             &c,
             [(EdgeType::OutLine, EdgeVis::V)],
             &glam::DVec3::ZERO,
