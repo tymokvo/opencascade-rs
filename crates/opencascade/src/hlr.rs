@@ -77,7 +77,6 @@ pub fn filter(
             ffi::HLRAlgo_Projector_from_trsf(&t, false, 0.0)
         },
     };
-    dbg!(transform::dmat4(proj.FullTransformation()));
     ffi::HLRBRep_Algo_Projector(&algo, &proj);
     ffi::HLRBRep_Algo_Update(&algo);
     ffi::HLRBRep_Algo_Hide(&algo);
