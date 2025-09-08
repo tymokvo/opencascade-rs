@@ -1483,12 +1483,6 @@ pub mod ffi {
         pub fn HLRAlgo_Projector_from_ax2(
             coordinate_system: &gp_Ax2,
         ) -> UniquePtr<HLRAlgo_Projector>;
-        #[cxx_name = "construct_unique"]
-        pub fn HLRAlgo_Projector_from_trsf(
-            transform: &gp_Trsf,
-            use_perspective: bool,
-            focal_length: f64,
-        ) -> UniquePtr<HLRAlgo_Projector>;
         pub fn Transformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
         pub fn InvertedTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
         pub fn FullTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
