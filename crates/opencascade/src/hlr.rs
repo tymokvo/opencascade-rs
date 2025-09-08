@@ -13,13 +13,12 @@ pub enum EdgeType {
     Undefined,
     IsoLine,
     OutLine,
-    // TODO: Consider naming these explicitly
     Rg1Line,
     RgNLine,
     Sharp,
 }
 impl EdgeType {
-    pub fn to_occ(&self) -> ffi::HLRBRep_TypeOfResultingEdge {
+    fn to_occ(&self) -> ffi::HLRBRep_TypeOfResultingEdge {
         match self {
             EdgeType::Undefined => ffi::HLRBRep_TypeOfResultingEdge::HLRBRep_Undefined,
             EdgeType::IsoLine => ffi::HLRBRep_TypeOfResultingEdge::HLRBRep_IsoLine,
@@ -39,7 +38,7 @@ pub enum EdgeVis {
     H,
 }
 impl EdgeVis {
-    pub fn to_occ(&self) -> bool {
+    fn to_occ(&self) -> bool {
         match &self {
             Self::V => true,
             Self::H => false,
