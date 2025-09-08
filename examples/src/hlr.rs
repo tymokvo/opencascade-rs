@@ -4,38 +4,8 @@ use opencascade::{
     workplane::Workplane,
 };
 
-fn gizmo() -> Shape {
-    let xy = Workplane::xy().sketch().line_to(1.0, 0.0).move_to(0.0, 0.0).line_to(0.0, 1.0).wire();
-    let z = Workplane::xz().sketch().line_to(0.0, 1.0).wire();
-    let c = Workplane::xy().circle(0.0, 0.0, 0.5);
-    let ltr_x = Workplane::xy()
-        .sketch()
-        .move_to(0.9, 0.0)
-        .line_to(0.95, 0.05)
-        .line_to(1.0, 0.1)
-        .move_to(1.0, 0.0)
-        .line_to(0.95, 0.05)
-        .line_to(0.9, 0.1)
-        .wire();
-    let ltr_y = Workplane::xy()
-        .sketch()
-        .move_to(0.0, 0.9)
-        .line_to(0.05, 0.95)
-        .line_to(0.1, 1.0)
-        .move_to(0.05, 0.95)
-        .line_to(0.0, 1.0)
-        .wire();
-    Compound::from_shapes(vec![
-        xy.into_shape(),
-        z.into_shape(),
-        c.into_shape(),
-        ltr_x.into_shape(),
-        ltr_y.into_shape(),
-    ])
-    .into()
-}
-
 pub fn shape() -> Shape {
+    // Create a shape that is uniquely identifiable from all 6 +/-(XYZ) axes
     let c = Workplane::xy()
         .sketch()
         .line_to(1.0, 0.0)
@@ -48,56 +18,23 @@ pub fn shape() -> Shape {
     let ls = Shape::sphere(0.5).at(glam::dvec3(1.0, 2.0, 3.0)).build();
     let ss = Shape::sphere(0.25).at(glam::dvec3(0.0, 0.0, 3.0)).build();
     let shape = c.union(&ls).union(&ss).into_shape();
+
+    // Create a vector of shapes to combine for display
     let mut shapes: Vec<Shape> = vec![];
 
-    for tr in [
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 3.5 + 1.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [-1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, -1.0, 0.0],
-            [0.0, 0.0, -1.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [1.0, 0.0, 0.0, 0.0],
-            [1.5 + 1.0, 0.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, -1.0, 0.0, 0.0],
-            [0.0, -0.25 - 1.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [0.0, -1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [-1.0, 0.0, 0.0, 0.0],
-            [-0.25 - 1.0, 2.5, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [-1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [1.5, 2.5 + 1.0, 0.0, 1.0],
-        ]),
-    ] {
-        let (_, p) = hlr::filter(
-            &shape.transform(&tr.inverse()),
-            [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
-            &glam::DVec3::ZERO,
-            &glam::DVec3::Z,
-            true,
-        );
-        shapes.push(p.transform(&tr));
-    }
+    // Use the `hlr` module to "filter" for edges that are "visible" to the created coordinate system
+    let (_, mut p) = hlr::filter(
+        &shape,
+        [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
+        &glam::DVec3::ZERO,
+        &glam::dvec3(1.0, 1.0, 1.0), // The vector will be normalized and derive a coherent coordinate system by OCC
+        true,
+    );
+    // Move the projected curves down to see them all
+    p.set_global_translation(glam::dvec3(0.0, 0.0, -1.0));
+    shapes.push(p);
 
+    // Show the projected shape
     shapes.push(shape);
     Compound::from_shapes(shapes).into()
 }
