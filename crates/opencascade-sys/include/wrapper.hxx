@@ -582,5 +582,5 @@ inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_
   return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
 }
 
-// gp_Trsf
+// NCollection_Mat4
 typedef NCollection_Mat4<Standard_Real> Mat4_Double;
