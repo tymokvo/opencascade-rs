@@ -52,58 +52,22 @@ pub fn shape() -> Shape {
     let shape = c.union(&ls).union(&ss).into_shape();
     let mut shapes: Vec<Shape> = vec![];
 
-    for (i, tr) in [
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 0.0, 10.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, -1.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, -1.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [0.0, 0.0, -1.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]),
-        glam::DMat4::from_cols_array_2d(&[
-            [0.0, 0.0, 1.0, 0.0],
-            [0.0, 1.0, 0.0, 0.0],
-            [-1.0, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 1.0],
-        ]),
-    ]
+    for (i, tr) in [glam::DMat4::from_cols_array_2d(&[
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [1.0, 0.0, 0.0, 0.0],
+        [1.5, 0.0, 0.0, 1.0],
+    ])]
     .iter()
     .enumerate()
     {
         let p = hlr::filter(
-            &shape.transform(&tr),
+            &shape.transform(&tr.inverse()),
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
             &PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::DVec3::Z),
             true,
         );
-        shapes.push(p.transform(&glam::DMat4::from_translation(glam::dvec3(
-            0.0,
-            0.0,
-            (i as f64) * -1.0 - 1.0,
-        ))));
+        shapes.push(p.transform(&tr));
     }
 
     shapes.push(shape);
