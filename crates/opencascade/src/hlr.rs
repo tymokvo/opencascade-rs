@@ -1,3 +1,6 @@
+//! HLR: Hidden Line Removal
+//!
+//! This module exposes a subset of the functionality of the TKHLR toolkit from OpenCASCADE
 use crate::{
     primitives::{Compound, Shape},
     transform,
