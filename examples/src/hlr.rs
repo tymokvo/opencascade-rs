@@ -1,7 +1,5 @@
-use core::f64;
-
 use opencascade::{
-    hlr::{self, EdgeType, EdgeVis, PlaneSpec},
+    hlr::{self, EdgeType, EdgeVis},
     primitives::{Compound, IntoShape, Shape},
     workplane::Workplane,
 };
@@ -93,7 +91,8 @@ pub fn shape() -> Shape {
         let p = hlr::filter(
             &shape.transform(&tr.inverse()),
             [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
-            &PlaneSpec::OriginNormal(glam::DVec3::ZERO, glam::DVec3::Z),
+            &glam::DVec3::ZERO,
+            &glam::DVec3::Z,
             true,
         );
         shapes.push(p.transform(&tr));
