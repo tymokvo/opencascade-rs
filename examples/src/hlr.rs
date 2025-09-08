@@ -22,17 +22,28 @@ pub fn shape() -> Shape {
     // Create a vector of shapes to combine for display
     let mut shapes: Vec<Shape> = vec![];
 
-    // Use the `hlr` module to "filter" for edges that are "visible" to the created coordinate system
-    let (_, mut p) = hlr::filter(
-        &shape,
-        [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
-        &glam::DVec3::ZERO,
-        &glam::dvec3(1.0, 1.0, 1.0), // The vector will be normalized and derive a coherent coordinate system by OCC
-        true,
-    );
-    // Move the projected curves down to see them all
-    p.set_global_translation(glam::dvec3(0.0, 0.0, -1.0));
-    shapes.push(p);
+    // Create right, rear, top views
+    for (i, n) in [
+        //
+        glam::DVec3::X,
+        glam::DVec3::Y,
+        glam::DVec3::Z,
+    ]
+    .iter()
+    .enumerate()
+    {
+        // Use the `hlr` module to "filter" for edges that are "visible" to the created coordinate system
+        let (_, mut p) = hlr::filter(
+            &shape,
+            [(EdgeType::Sharp, EdgeVis::V), (EdgeType::OutLine, EdgeVis::V)],
+            &glam::DVec3::ZERO,
+            &n, // The vector will be normalized and derive a coherent coordinate system by OCC
+            true,
+        );
+        // Move the projected curves down to see them all
+        p.set_global_translation(glam::dvec3(0.0, 0.0, -1.0 * (i as f64) - 1.0));
+        shapes.push(p);
+    }
 
     // Show the projected shape
     shapes.push(shape);
