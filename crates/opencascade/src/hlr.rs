@@ -92,6 +92,7 @@ pub fn filter(
             !project_edges_to_plane,
         );
         if !res.IsNull() {
+            ffi::BRepLibBuildCurves3d(&res);
             shapes.push(Shape::from_shape(&res));
         }
     }
