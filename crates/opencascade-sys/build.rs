@@ -20,6 +20,7 @@ const OCCT_LIBS: &[&str] = &[
     "TKDEIGES",
     "TKDESTL",
     "TKMesh",
+    "TKHLR",
     "TKShHealing",
     "TKFillet",
     "TKBool",

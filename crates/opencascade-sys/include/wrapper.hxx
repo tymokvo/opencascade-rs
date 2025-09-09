@@ -59,12 +59,17 @@
 #include <Geom_Plane.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
+#include <HLRAlgo.hxx>
+#include <HLRAlgo_Projector.hxx>
+#include <HLRBRep_Algo.hxx>
+#include <HLRBRep_HLRToShape.hxx>
 #include <IGESControl_Reader.hxx>
 #include <IGESControl_Writer.hxx>
 #include <Law_Function.hxx>
 #include <Law_Interpol.hxx>
 #include <NCollection_Array1.hxx>
 #include <NCollection_Array2.hxx>
+#include <NCollection_Mat4.hxx>
 #include <Poly_Connect.hxx>
 #include <STEPControl_Reader.hxx>
 #include <STEPControl_Writer.hxx>
@@ -571,3 +576,39 @@ inline std::unique_ptr<gp_Pnt> Bnd_Box_CornerMax(const Bnd_Box &box) {
 inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standard_Boolean useTriangulation) {
   BRepBndLib::Add(shape, box, useTriangulation);
 }
+
+// HLRAlgo
+
+typedef opencascade::handle<HLRBRep_Algo> Handle_HLRBRep_Algo;
+
+inline std::unique_ptr<Handle_HLRBRep_Algo> Handle_HLRBRep_Algo_ctor() {
+  Handle(HLRBRep_Algo) hlr = new HLRBRep_Algo;
+  return std::unique_ptr<Handle_HLRBRep_Algo>(new Handle_HLRBRep_Algo(hlr));
+}
+
+inline void HLRBRep_Algo_Add(const Handle_HLRBRep_Algo &algo, const TopoDS_Shape &s) {
+  auto a = algo.get();
+  a->Add(s);
+}
+inline void HLRBRep_Algo_Projector(const Handle_HLRBRep_Algo &algo, const HLRAlgo_Projector &p) {
+  return algo.get()->Projector(p);
+}
+inline void HLRBRep_Algo_Update(const Handle_HLRBRep_Algo &algo) { return algo.get()->Update(); }
+inline void HLRBRep_Algo_Hide(const Handle_HLRBRep_Algo &algo) { return algo.get()->Hide(); }
+
+inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_VCompound(HLRBRep_HLRToShape &ts) {
+  auto s = new TopoDS_Shape;
+  *s = ts.VCompound();
+  return std::unique_ptr<TopoDS_Shape>(s);
+}
+
+inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_HLRToShape &ts,
+                                                                        const HLRBRep_TypeOfResultingEdge typ,
+                                                                        const Standard_Boolean visible,
+                                                                        const Standard_Boolean in3d) {
+  auto s = ts.CompoundOfEdges(typ, visible, in3d);
+  return std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape(s));
+}
+
+// NCollection_Mat4
+typedef NCollection_Mat4<Standard_Real> Mat4_Double;

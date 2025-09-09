@@ -72,6 +72,17 @@ pub mod ffi {
         TopAbs_UNKNOWN,
     }
 
+    #[repr(u32)]
+    #[derive(Debug)]
+    pub enum HLRBRep_TypeOfResultingEdge {
+        HLRBRep_Undefined,
+        HLRBRep_IsoLine,
+        HLRBRep_OutLine,
+        HLRBRep_Rg1Line,
+        HLRBRep_RgNLine,
+        HLRBRep_Sharp,
+    }
+
     unsafe extern "C++" {
         // https://github.com/dtolnay/cxx/issues/280
 
@@ -1066,9 +1077,15 @@ pub mod ffi {
             a33: f64,
             a34: f64,
         );
+        pub fn GetMat4(self: &gp_Trsf, m: Pin<&mut Mat4_Double>);
 
         #[cxx_name = "SetTranslationPart"]
         pub fn set_translation_vec(self: Pin<&mut gp_Trsf>, translation: &gp_Vec);
+
+        type Mat4_Double;
+        #[cxx_name = "construct_unique"]
+        pub fn Mat4_Double_ctor() -> UniquePtr<Mat4_Double>;
+        pub fn GetValue(self: &Mat4_Double, row: usize, col: usize) -> f64;
 
         type gp_GTrsf;
         #[cxx_name = "construct_unique"]
@@ -1459,6 +1476,40 @@ pub mod ffi {
         pub fn Load(self: Pin<&mut BRepClass3d_SolidClassifier>, shape: &TopoDS_Shape);
         pub fn Perform(self: Pin<&mut BRepClass3d_SolidClassifier>, point: &gp_Pnt, tolerance: f64);
         pub fn State(self: &BRepClass3d_SolidClassifier) -> TopAbs_State;
+
+        // HLRBrep
+        // Shape -> Plane projection
+        type Handle_HLRBRep_Algo;
+        pub fn Handle_HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
+        pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
+        pub fn HLRBRep_Algo_Projector(algo: &Handle_HLRBRep_Algo, projector: &HLRAlgo_Projector);
+        pub fn HLRBRep_Algo_Update(algo: &Handle_HLRBRep_Algo);
+        pub fn HLRBRep_Algo_Hide(algo: &Handle_HLRBRep_Algo);
+
+        type HLRAlgo_Projector;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRAlgo_Projector_from_ax2(
+            coordinate_system: &gp_Ax2,
+        ) -> UniquePtr<HLRAlgo_Projector>;
+        pub fn Transformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
+        pub fn InvertedTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
+        pub fn FullTransformation(self: &HLRAlgo_Projector) -> &gp_Trsf;
+
+        type HLRBRep_HLRToShape;
+        type HLRBRep_TypeOfResultingEdge;
+        #[cxx_name = "construct_unique"]
+        pub fn HLRBRep_HLRToShape_ctor(
+            hlr_algo: &Handle_HLRBRep_Algo,
+        ) -> UniquePtr<HLRBRep_HLRToShape>;
+        pub fn HLRBRep_HLRToShape_VCompound(
+            ts: Pin<&mut HLRBRep_HLRToShape>,
+        ) -> UniquePtr<TopoDS_Shape>;
+        pub fn HLRBRep_HLRToShape_CompoundOfEdges(
+            ts: Pin<&mut HLRBRep_HLRToShape>,
+            edge_type: HLRBRep_TypeOfResultingEdge,
+            visible: bool,
+            in_3d: bool,
+        ) -> UniquePtr<TopoDS_Shape>;
     }
 }
 

@@ -10,6 +10,7 @@ pub mod flat_ethernet_bracket;
 pub mod gizmo;
 pub mod heater_coil;
 pub mod high_level_bottle;
+pub mod hlr;
 pub mod keyboard_case;
 pub mod keycap;
 pub mod letter_a;
@@ -36,6 +37,7 @@ pub enum Example {
     Gizmo,
     HeaterCoil,
     HighLevelBottle,
+    HLR,
     KeyboardCase,
     Keycap,
     LetterA,
@@ -64,6 +66,7 @@ impl Example {
             Example::Gizmo => gizmo::shape(),
             Example::HeaterCoil => heater_coil::shape(),
             Example::HighLevelBottle => high_level_bottle::shape(),
+            Example::HLR => hlr::shape(),
             Example::KeyboardCase => keyboard_case::shape(),
             Example::Keycap => keycap::shape(),
             Example::LetterA => letter_a::shape(),
