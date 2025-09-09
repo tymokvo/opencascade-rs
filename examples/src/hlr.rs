@@ -28,6 +28,8 @@ pub fn shape() -> Shape {
         glam::DVec3::X,
         glam::DVec3::Y,
         glam::DVec3::Z,
+        glam::dvec3(1.0, 1.0, 1.0), // The vector will be normalized internally by the `gp_Dir` constructor
+        glam::dvec3(-1.0, -1.0, 1.0),
     ]
     .iter()
     .enumerate()
@@ -41,7 +43,7 @@ pub fn shape() -> Shape {
             true,
         );
         // Move the projected curves down to see them all
-        p.set_global_translation(glam::dvec3(0.0, 0.0, -1.0 * (i as f64) - 1.0));
+        p.set_global_translation(glam::dvec3(0.0, 0.0, -2.0 * (i as f64) - 1.0));
         shapes.push(p);
     }
 
