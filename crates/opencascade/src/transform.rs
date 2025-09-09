@@ -28,6 +28,18 @@ pub fn gp_trsf(mat: &DMat4) -> UniquePtr<ffi::gp_Trsf> {
     t
 }
 
+pub fn dmat4(trsf: &ffi::gp_Trsf) -> DMat4 {
+    let mut m = ffi::Mat4_Double_ctor();
+    trsf.GetMat4(m.pin_mut());
+    let mut mat = glam::DMat4::ZERO;
+    for r in 0usize..=3 {
+        for c in 0usize..=3 {
+            mat.col_mut(c)[r] = m.GetValue(r, c);
+        }
+    }
+    mat
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -52,5 +64,21 @@ mod test {
         assert_eq!(t.Value(1, 2), 1.0);
         assert_eq!(t.Value(3, 1), 1.0);
         assert_eq!(t.Value(2, 3), 1.0);
+    }
+
+    #[test]
+    fn set_dmat4_values() {
+        let m = glam::dmat4(
+            glam::dvec4(0.0, 0.0, 1.0, 0.0),
+            glam::dvec4(1.0, 0.0, 0.0, 0.0),
+            glam::dvec4(0.0, 1.0, 0.0, 0.0),
+            glam::dvec4(0.0, 0.0, 0.0, 1.0),
+        );
+
+        let t = gp_trsf(&m);
+
+        let mm = dmat4(&t);
+
+        assert_eq!(m, mm);
     }
 }
