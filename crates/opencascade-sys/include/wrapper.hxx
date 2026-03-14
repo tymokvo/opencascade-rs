@@ -612,3 +612,11 @@ inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_
 
 // NCollection_Mat4
 typedef NCollection_Mat4<Standard_Real> Mat4_Double;
+
+inline std::unique_ptr<ShapeAnalysis_FreeBounds> ShapeAnalysis_FreeBounds_ctor(const TopoDS_Shape &shape,
+                                                                               const Standard_Real tolerance,
+                                                                               const Standard_Boolean split_closed,
+                                                                               const Standard_Boolean split_open) {
+  return std::unique_ptr<ShapeAnalysis_FreeBounds>(
+      new ShapeAnalysis_FreeBounds(shape, tolerance, split_closed, split_open));
+}
