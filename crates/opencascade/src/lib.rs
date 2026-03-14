@@ -7,6 +7,7 @@ pub mod kicad;
 pub mod mesh;
 pub mod primitives;
 pub mod section;
+pub mod shape_analysis;
 pub mod transform;
 pub mod workplane;
 
