@@ -1438,6 +1438,12 @@ pub mod ffi {
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
 
+        pub fn dispatch_wires(
+            wires: &HandleTopTools_HSequenceOfShape,
+            closed: Pin<&mut TopoDS_Compound>,
+            open: Pin<&mut TopoDS_Compound>,
+        );
+
         // BndBox
         // Describes a bounding box in 3D space.
         type Bnd_Box;
@@ -1510,17 +1516,6 @@ pub mod ffi {
             visible: bool,
             in_3d: bool,
         ) -> UniquePtr<TopoDS_Shape>;
-
-        // ShapeAnalysis_FreeBounds
-        type ShapeAnalysis_FreeBounds;
-        pub fn ShapeAnalysis_FreeBounds_ctor(
-            shape: &TopoDS_Shape,
-            tolerance: f64,
-            split_closed: bool,
-            split_open: bool,
-        ) -> UniquePtr<ShapeAnalysis_FreeBounds>;
-        pub fn GetClosedWires(self: &ShapeAnalysis_FreeBounds) -> &TopoDS_Compound;
-        pub fn GetOpenWires(self: &ShapeAnalysis_FreeBounds) -> &TopoDS_Compound;
     }
 }
 

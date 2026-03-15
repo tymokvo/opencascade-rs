@@ -534,6 +534,11 @@ inline void connect_edges_to_wires(HandleTopTools_HSequenceOfShape &edges, const
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
+inline void dispatch_wires(const HandleTopTools_HSequenceOfShape &wires, TopoDS_Compound &closed,
+                           TopoDS_Compound &open) {
+  ShapeAnalysis_FreeBounds::DispatchWires(wires, closed, open);
+}
+
 inline std::unique_ptr<HandleTopTools_HSequenceOfShape> new_HandleTopTools_HSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);
@@ -612,11 +617,3 @@ inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_CompoundOfEdges(HLRBRep_
 
 // NCollection_Mat4
 typedef NCollection_Mat4<Standard_Real> Mat4_Double;
-
-inline std::unique_ptr<ShapeAnalysis_FreeBounds> ShapeAnalysis_FreeBounds_ctor(const TopoDS_Shape &shape,
-                                                                               const Standard_Real tolerance,
-                                                                               const Standard_Boolean split_closed,
-                                                                               const Standard_Boolean split_open) {
-  return std::unique_ptr<ShapeAnalysis_FreeBounds>(
-      new ShapeAnalysis_FreeBounds(shape, tolerance, split_closed, split_open));
-}
