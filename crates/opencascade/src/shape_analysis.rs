@@ -1,35 +1,45 @@
-use crate::primitives::{Compound, Shape};
-use cxx::UniquePtr;
+use crate::primitives::{Shape, WireIterator};
 use opencascade_sys::ffi;
 
-pub struct ShapeAnalysisFreeBounds {
-    pub(crate) inner: UniquePtr<ffi::ShapeAnalysis_FreeBounds>,
+pub struct DispatchWires {
+    open: Shape,
+    closed: Shape,
 }
-impl ShapeAnalysisFreeBounds {
-    pub fn new(shape: &Shape, tolerance: f64, split_closed: bool, split_open: bool) -> Self {
-        Self {
-            inner: ffi::ShapeAnalysis_FreeBounds_ctor(
-                &shape.inner,
-                tolerance,
-                split_closed,
-                split_open,
-            ),
-        }
+impl DispatchWires {
+    pub fn open(&self) -> WireIterator {
+        WireIterator::for_shape(&self.open)
+    }
+    pub fn closed(&self) -> WireIterator {
+        WireIterator::for_shape(&self.closed)
+    }
+}
+
+pub fn dispatch_wires(shape: &Shape, max_join_distance: f64) -> DispatchWires {
+    let mut edges = ffi::new_HandleTopTools_HSequenceOfShape();
+
+    let mut explorer = ffi::TopExp_Explorer_ctor(&shape.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
+    while explorer.More() {
+        ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), explorer.Current());
+        explorer.pin_mut().Next();
     }
 
-    pub fn closed_wires(&self) -> Compound {
-        Compound::from_compound(self.inner.GetClosedWires())
-    }
+    let mut wires = ffi::new_HandleTopTools_HSequenceOfShape();
+    ffi::connect_edges_to_wires(edges.pin_mut(), max_join_distance, false, wires.pin_mut());
 
-    pub fn open_wires(&self) -> Compound {
-        Compound::from_compound(self.inner.GetOpenWires())
+    let mut closed = ffi::TopoDS_Compound_ctor();
+    let mut open = ffi::TopoDS_Compound_ctor();
+    ffi::dispatch_wires(&wires, closed.pin_mut(), open.pin_mut());
+
+    DispatchWires {
+        open: Shape::from_shape(&ffi::TopoDS_Compound_as_shape(open)),
+        closed: Shape::from_shape(&ffi::TopoDS_Compound_as_shape(closed)),
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::primitives::{Edge, IntoShape, WireIterator};
+    use crate::primitives::{Compound, Edge, IntoShape};
 
     fn v(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> glam::DVec3 {
         glam::dvec3(x.into(), y.into(), z.into())
@@ -51,17 +61,8 @@ mod test {
         ]
         .map(|(a, b)| Edge::segment(a, b).into_shape());
 
-        let edge_compound = Compound::from_shapes(edges);
+        let dw = dispatch_wires(&Compound::from_shapes(edges).into_shape(), 0.1);
 
-        let sa = ShapeAnalysisFreeBounds::new(&edge_compound.into_shape(), 0.001, false, true);
-
-        let wires = WireIterator {
-            explorer: ffi::TopExp_Explorer_ctor(
-                &sa.closed_wires().into_shape().inner,
-                ffi::TopAbs_ShapeEnum::TopAbs_WIRE,
-            ),
-        };
-
-        assert_eq!(wires.count(), 2);
+        assert_eq!(dw.closed().count(), 2);
     }
 }
