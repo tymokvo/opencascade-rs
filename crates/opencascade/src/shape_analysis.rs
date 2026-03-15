@@ -1,4 +1,4 @@
-use crate::primitives::{Shape, WireIterator};
+use crate::primitives::{Edge, IntoShape, Shape, WireIterator};
 use opencascade_sys::ffi;
 
 pub struct DispatchWires {
@@ -14,17 +14,18 @@ impl DispatchWires {
     }
 }
 
-pub fn dispatch_wires(shape: &Shape, max_join_distance: f64) -> DispatchWires {
-    let mut edges = ffi::new_HandleTopTools_HSequenceOfShape();
+pub fn dispatch_wires(edges: impl Iterator<Item = Edge>, max_join_distance: f64) -> DispatchWires {
+    let mut edge_seq = ffi::new_HandleTopTools_HSequenceOfShape();
 
-    let mut explorer = ffi::TopExp_Explorer_ctor(&shape.inner, ffi::TopAbs_ShapeEnum::TopAbs_EDGE);
-    while explorer.More() {
-        ffi::TopTools_HSequenceOfShape_append(edges.pin_mut(), explorer.Current());
-        explorer.pin_mut().Next();
+    for e in edges {
+        ffi::TopTools_HSequenceOfShape_append(
+            edge_seq.pin_mut(),
+            ffi::cast_edge_to_shape(&e.inner),
+        );
     }
 
     let mut wires = ffi::new_HandleTopTools_HSequenceOfShape();
-    ffi::connect_edges_to_wires(edges.pin_mut(), max_join_distance, false, wires.pin_mut());
+    ffi::connect_edges_to_wires(edge_seq.pin_mut(), max_join_distance, false, wires.pin_mut());
 
     let mut closed = ffi::TopoDS_Compound_ctor();
     let mut open = ffi::TopoDS_Compound_ctor();
@@ -39,7 +40,7 @@ pub fn dispatch_wires(shape: &Shape, max_join_distance: f64) -> DispatchWires {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::primitives::{Compound, Edge, IntoShape};
+    use crate::primitives::Edge;
 
     fn v(x: impl Into<f64>, y: impl Into<f64>, z: impl Into<f64>) -> glam::DVec3 {
         glam::dvec3(x.into(), y.into(), z.into())
@@ -59,9 +60,9 @@ mod test {
             (v(4, 2, 0), v(4, 0, 0)),
             (v(4, 2, 0), v(3, 2, 0)),
         ]
-        .map(|(a, b)| Edge::segment(a, b).into_shape());
+        .map(|(a, b)| Edge::segment(a, b));
 
-        let dw = dispatch_wires(&Compound::from_shapes(edges).into_shape(), 0.1);
+        let dw = dispatch_wires(edges.into_iter(), 0.1);
 
         assert_eq!(dw.closed().count(), 2);
         assert_eq!(dw.open().count(), 0);
