@@ -1,6 +1,7 @@
-use crate::primitives::{Edge, IntoShape, Shape, WireIterator};
+use crate::primitives::{Edge, Shape, WireIterator};
 use opencascade_sys::ffi;
 
+/// A grouping of shapes containing open and closed wires that result from a call to [`dispatch_wires`]
 pub struct DispatchWires {
     open: Shape,
     closed: Shape,
@@ -14,6 +15,13 @@ impl DispatchWires {
     }
 }
 
+/// Issue a call to `ShapeAnalysis_FreeBounds::DispatchWires` using an iterator
+/// of edges as the input. This function takes in an `HSequenceOfShape`
+/// containing edges and attempts to join them into groups of open and closed
+/// wires.
+///
+/// The result type wraps the grouping of wires that have resulted from the
+/// analysis.
 pub fn dispatch_wires(edges: impl Iterator<Item = Edge>, max_join_distance: f64) -> DispatchWires {
     let mut edge_seq = ffi::new_HandleTopTools_HSequenceOfShape();
 
