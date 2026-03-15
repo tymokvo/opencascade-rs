@@ -152,6 +152,13 @@ impl EdgeIterator {
 pub struct WireIterator {
     pub(crate) explorer: UniquePtr<ffi::TopExp_Explorer>,
 }
+impl WireIterator {
+    pub fn for_shape(shape: &Shape) -> Self {
+        Self {
+            explorer: ffi::TopExp_Explorer_ctor(&shape.inner, ffi::TopAbs_ShapeEnum::TopAbs_WIRE),
+        }
+    }
+}
 impl Iterator for WireIterator {
     type Item = Wire;
 
