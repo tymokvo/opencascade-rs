@@ -534,6 +534,11 @@ inline void connect_edges_to_wires(HandleTopTools_HSequenceOfShape &edges, const
   ShapeAnalysis_FreeBounds::ConnectEdgesToWires(edges, toler, shared, wires);
 }
 
+inline void dispatch_wires(const HandleTopTools_HSequenceOfShape &wires, TopoDS_Compound &closed,
+                           TopoDS_Compound &open) {
+  ShapeAnalysis_FreeBounds::DispatchWires(wires, closed, open);
+}
+
 inline std::unique_ptr<HandleTopTools_HSequenceOfShape> new_HandleTopTools_HSequenceOfShape() {
   auto sequence = new TopTools_HSequenceOfShape();
   auto handle = new opencascade::handle<TopTools_HSequenceOfShape>(sequence);

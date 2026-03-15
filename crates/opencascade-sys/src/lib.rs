@@ -1438,6 +1438,12 @@ pub mod ffi {
             wires: Pin<&mut HandleTopTools_HSequenceOfShape>,
         );
 
+        pub fn dispatch_wires(
+            wires: &HandleTopTools_HSequenceOfShape,
+            closed: Pin<&mut TopoDS_Compound>,
+            open: Pin<&mut TopoDS_Compound>,
+        );
+
         // BndBox
         // Describes a bounding box in 3D space.
         type Bnd_Box;
