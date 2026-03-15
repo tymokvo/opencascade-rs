@@ -64,5 +64,6 @@ mod test {
         let dw = dispatch_wires(&Compound::from_shapes(edges).into_shape(), 0.1);
 
         assert_eq!(dw.closed().count(), 2);
+        assert_eq!(dw.open().count(), 0);
     }
 }
