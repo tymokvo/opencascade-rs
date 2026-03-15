@@ -67,12 +67,14 @@ mod test {
             (v(3, 0, 0), v(4, 0, 0)),
             (v(4, 2, 0), v(4, 0, 0)),
             (v(4, 2, 0), v(3, 2, 0)),
+            // Create open disconnected edge
+            (v(0, 1, 0), v(4, 1, 0)),
         ]
         .map(|(a, b)| Edge::segment(a, b));
 
         let dw = dispatch_wires(edges.into_iter(), 0.1);
 
         assert_eq!(dw.closed().count(), 2);
-        assert_eq!(dw.open().count(), 0);
+        assert_eq!(dw.open().count(), 1);
     }
 }
