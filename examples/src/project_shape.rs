@@ -2,6 +2,7 @@ use opencascade::{
     angle::Angle,
     hlr,
     primitives::{Compound, IntoShape, Shape},
+    shape_analysis,
     workplane::Workplane,
 };
 
@@ -17,14 +18,21 @@ fn shape_to_project() -> Shape {
 }
 
 fn project(shape: &Shape) -> Shape {
-    let (_, projection) = hlr::filter(
-        shape,
-        [(hlr::EdgeType::Sharp, hlr::EdgeVis::V)],
-        &glam::DVec3::ZERO,
-        &glam::DVec3::Z,
-        true,
-    );
-    projection
+    let mut projections = vec![];
+    for face in shape.faces() {
+        let (_, projection) = hlr::filter(
+            &face.into_shape(),
+            [(hlr::EdgeType::Sharp, hlr::EdgeVis::V)],
+            &glam::DVec3::ZERO,
+            &glam::DVec3::Z,
+            true,
+        );
+        let dw = shape_analysis::dispatch_wires(projection.edges(), 0.01);
+        for closed in dw.closed() {
+            projections.push(closed.to_face().into_shape());
+        }
+    }
+    Compound::from_shapes(projections).into_shape()
 }
 
 pub fn shape() -> Shape {
