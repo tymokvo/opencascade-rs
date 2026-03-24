@@ -4,6 +4,17 @@ use opencascade::{
     workplane::Workplane,
 };
 
+fn shape_to_project() -> Shape {
+    let wp = Workplane::xy()
+        .rotated(opencascade::angle::RVec {
+            x: Angle::Degrees(45.0),
+            y: Angle::Degrees(45.0),
+            z: Angle::Degrees(0.0),
+        })
+        .translated(glam::dvec3(0.0, 0.0, 16.0));
+    wp.rect(4.0, 8.0).to_face().extrude(wp.normal()).into_shape()
+}
+
 pub fn shape() -> Shape {
     let axes = Workplane::xy()
         .sketch()
@@ -12,13 +23,6 @@ pub fn shape() -> Shape {
         .line_to(0.0, 1.0)
         .wire()
         .into_shape();
-    let wp = Workplane::xy()
-        .rotated(opencascade::angle::RVec {
-            x: Angle::Degrees(45.0),
-            y: Angle::Degrees(45.0),
-            z: Angle::Degrees(0.0),
-        })
-        .translated(glam::dvec3(0.0, 0.0, 16.0));
-    let extrusion = wp.rect(4.0, 8.0).to_face().extrude(wp.normal()).into_shape();
-    Compound::from_shapes([axes, extrusion]).into_shape()
+    let projectee = shape_to_project();
+    Compound::from_shapes([axes, projectee]).into_shape()
 }
