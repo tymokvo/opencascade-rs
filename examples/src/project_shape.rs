@@ -1,5 +1,6 @@
 use opencascade::{
     angle::Angle,
+    hlr,
     primitives::{Compound, IntoShape, Shape},
     workplane::Workplane,
 };
@@ -15,14 +16,28 @@ fn shape_to_project() -> Shape {
     wp.rect(4.0, 8.0).to_face().extrude(wp.normal()).into_shape()
 }
 
+fn project(shape: &Shape) -> Shape {
+    let (_, projection) = hlr::filter(
+        shape,
+        [(hlr::EdgeType::Sharp, hlr::EdgeVis::V)],
+        &glam::DVec3::ZERO,
+        &glam::DVec3::Z,
+        true,
+    );
+    projection
+}
+
 pub fn shape() -> Shape {
     let axes = Workplane::xy()
         .sketch()
-        .line_to(1.0, 0.0)
+        .line_to(2.0, 0.0)
         .move_to(0.0, 0.0)
         .line_to(0.0, 1.0)
         .wire()
         .into_shape();
     let projectee = shape_to_project();
-    Compound::from_shapes([axes, projectee]).into_shape()
+
+    let projection = project(&projectee);
+
+    Compound::from_shapes([axes, projectee, projection]).into_shape()
 }
