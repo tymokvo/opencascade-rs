@@ -14,7 +14,13 @@ fn shape_to_project() -> Shape {
             z: Angle::Degrees(0.0),
         })
         .translated(glam::dvec3(0.0, 0.0, 16.0));
-    wp.rect(4.0, 8.0).to_face().extrude(wp.normal()).into_shape()
+    let rect = wp.rect(4.0, 8.0).to_face().extrude(wp.normal()).into_shape();
+    let cyl = {
+        // NOTE: Subtracting a circle here will cause a failure when the
+        // subtraction results in a face that has multiple closed edge loops
+        wp.circle(0.5, 0.0, 1.0).to_face().extrude(wp.normal()).into_shape()
+    };
+    rect.subtract(&cyl).into_shape()
 }
 
 fn project(shape: &Shape) -> Shape {
