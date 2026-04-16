@@ -784,6 +784,16 @@ impl Shape {
 
         Self::from_shape(make_hole.pin_mut().Shape())
     }
+
+    /// Whether the cxx UniquePtr is null.
+    pub fn cxx_null(&self) -> bool {
+        self.inner.is_null()
+    }
+
+    /// Whether the underlying `TopoDS_Shape` is null.
+    pub fn occ_null(&self) -> bool {
+        self.inner.IsNull()
+    }
 }
 
 /// Information about a point where a line hits (i.e. intersects) a face
