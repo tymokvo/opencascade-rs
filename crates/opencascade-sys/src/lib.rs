@@ -1485,12 +1485,12 @@ pub mod ffi {
 
         // HLRBrep
         // Shape -> Plane projection
-        type Handle_HLRBRep_Algo;
-        pub fn Handle_HLRBRep_Algo_ctor() -> UniquePtr<Handle_HLRBRep_Algo>;
-        pub fn HLRBRep_Algo_Add(algo: &Handle_HLRBRep_Algo, shape: &TopoDS_Shape);
-        pub fn HLRBRep_Algo_Projector(algo: &Handle_HLRBRep_Algo, projector: &HLRAlgo_Projector);
-        pub fn HLRBRep_Algo_Update(algo: &Handle_HLRBRep_Algo);
-        pub fn HLRBRep_Algo_Hide(algo: &Handle_HLRBRep_Algo);
+        type HandleHLRBRepAlgo;
+        pub fn HandleHLRBRepAlgo_ctor() -> UniquePtr<HandleHLRBRepAlgo>;
+        pub fn HLRBRep_Algo_Add(algo: &HandleHLRBRepAlgo, shape: &TopoDS_Shape);
+        pub fn HLRBRep_Algo_Projector(algo: &HandleHLRBRepAlgo, projector: &HLRAlgo_Projector);
+        pub fn HLRBRep_Algo_Update(algo: &HandleHLRBRepAlgo);
+        pub fn HLRBRep_Algo_Hide(algo: &HandleHLRBRepAlgo);
 
         type HLRAlgo_Projector;
         #[cxx_name = "construct_unique"]
@@ -1505,7 +1505,7 @@ pub mod ffi {
         type HLRBRep_TypeOfResultingEdge;
         #[cxx_name = "construct_unique"]
         pub fn HLRBRep_HLRToShape_ctor(
-            hlr_algo: &Handle_HLRBRep_Algo,
+            hlr_algo: &HandleHLRBRepAlgo,
         ) -> UniquePtr<HLRBRep_HLRToShape>;
         pub fn HLRBRep_HLRToShape_VCompound(
             ts: Pin<&mut HLRBRep_HLRToShape>,

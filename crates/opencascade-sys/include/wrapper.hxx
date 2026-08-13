@@ -584,22 +584,18 @@ inline void BRepBndLib_Add(const TopoDS_Shape &shape, Bnd_Box &box, const Standa
 
 // HLRAlgo
 
-typedef opencascade::handle<HLRBRep_Algo> Handle_HLRBRep_Algo;
+using HandleHLRBRepAlgo = Handle_HLRBRep_Algo;
 
-inline std::unique_ptr<Handle_HLRBRep_Algo> Handle_HLRBRep_Algo_ctor() {
-  Handle(HLRBRep_Algo) hlr = new HLRBRep_Algo;
-  return std::unique_ptr<Handle_HLRBRep_Algo>(new Handle_HLRBRep_Algo(hlr));
+inline std::unique_ptr<HandleHLRBRepAlgo> HandleHLRBRepAlgo_ctor() {
+  return std::unique_ptr<HandleHLRBRepAlgo>(new HandleHLRBRepAlgo(new HLRBRep_Algo));
 }
 
-inline void HLRBRep_Algo_Add(const Handle_HLRBRep_Algo &algo, const TopoDS_Shape &s) {
-  auto a = algo.get();
-  a->Add(s);
+inline void HLRBRep_Algo_Add(const HandleHLRBRepAlgo &algo, const TopoDS_Shape &s) { algo->Add(s); }
+inline void HLRBRep_Algo_Projector(const HandleHLRBRepAlgo &algo, const HLRAlgo_Projector &p) {
+  algo->Projector(p);
 }
-inline void HLRBRep_Algo_Projector(const Handle_HLRBRep_Algo &algo, const HLRAlgo_Projector &p) {
-  return algo.get()->Projector(p);
-}
-inline void HLRBRep_Algo_Update(const Handle_HLRBRep_Algo &algo) { return algo.get()->Update(); }
-inline void HLRBRep_Algo_Hide(const Handle_HLRBRep_Algo &algo) { return algo.get()->Hide(); }
+inline void HLRBRep_Algo_Update(const HandleHLRBRepAlgo &algo) { algo->Update(); }
+inline void HLRBRep_Algo_Hide(const HandleHLRBRepAlgo &algo) { algo->Hide(); }
 
 inline std::unique_ptr<TopoDS_Shape> HLRBRep_HLRToShape_VCompound(HLRBRep_HLRToShape &ts) {
   auto s = new TopoDS_Shape;
