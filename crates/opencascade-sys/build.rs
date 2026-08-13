@@ -56,6 +56,10 @@ fn main() {
         build.define("OCC_CONVERT_SIGNALS", "TRUE");
     }
 
+    if target.to_lowercase().contains("msvc") {
+        build.flag("/EHsc");
+    }
+
     if let "windows" = std::env::consts::OS {
         let current = std::env::current_dir().unwrap();
         build.include(current.parent().unwrap());
