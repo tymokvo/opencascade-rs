@@ -611,6 +611,24 @@ impl Shape {
         }
     }
 
+    /// Serialize this shape using OCCT's binary `BinTools` format.
+    #[must_use]
+    pub fn to_brep_bin_bytes(&self) -> Vec<u8> {
+        ffi::write_brep_bin_bytes(&self.inner)
+    }
+
+    /// Deserialize a shape from OCCT's binary `BinTools` format.
+    ///
+    /// The bytes must have been produced by a compatible OCCT version.
+    pub fn from_brep_bin_bytes(bytes: &[u8]) -> Result<Self, Error> {
+        let inner = ffi::read_brep_bin_bytes(bytes);
+        if inner.is_null() {
+            Err(Error::BrepDeserializeFailed)
+        } else {
+            Ok(Self { inner })
+        }
+    }
+
     #[must_use]
     pub fn union(&self, other: &Shape) -> BooleanShape {
         let mut fuse_operation = ffi::BRepAlgoAPI_Fuse_ctor(&self.inner, &other.inner);

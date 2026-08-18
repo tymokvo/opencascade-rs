@@ -95,6 +95,7 @@
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
+#include <sstream>
 
 // Generic template constructor
 template <typename T, typename... Args> std::unique_ptr<T> construct_unique(Args... args) {
@@ -500,6 +501,33 @@ inline std::unique_ptr<TopoDS_Shape> read_brep_bin(rust::String path) {
     return shape;
   }
   return std::unique_ptr<TopoDS_Shape>(nullptr);
+}
+
+inline rust::Vec<std::uint8_t> write_brep_bin_bytes(const TopoDS_Shape &shape) {
+  std::ostringstream stream(std::ios::binary);
+  BinTools::Write(shape, stream, Standard_False, Standard_False, BinTools_FormatVersion_CURRENT);
+  const std::string bytes = stream.str();
+  rust::Vec<std::uint8_t> result;
+  result.reserve(bytes.size());
+  for (const unsigned char byte : bytes) {
+    result.push_back(byte);
+  }
+  return result;
+}
+
+inline std::unique_ptr<TopoDS_Shape> read_brep_bin_bytes(rust::Slice<const std::uint8_t> bytes) {
+  const std::string data(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+  std::istringstream stream(data, std::ios::binary);
+  auto shape = std::unique_ptr<TopoDS_Shape>(new TopoDS_Shape());
+  try {
+    BinTools::Read(*shape, stream);
+  } catch (...) {
+    return nullptr;
+  }
+  if (!stream || shape->IsNull()) {
+    return nullptr;
+  }
+  return shape;
 }
 
 // Collections

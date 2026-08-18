@@ -32,6 +32,8 @@ pub enum Error {
     BrepReadFailed,
     #[error("failed to write BREP file")]
     BrepWriteFailed,
+    #[error("failed to deserialize binary BREP data")]
+    BrepDeserializeFailed,
     #[error("failed to triangulate Shape")]
     TriangulationFailed,
     #[error("encountered a face with no triangulation")]
