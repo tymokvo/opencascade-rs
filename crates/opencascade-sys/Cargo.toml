@@ -9,11 +9,12 @@ repository = "https://github.com/bschwind/opencascade-rs"
 
 [dependencies]
 cxx = "1"
+occt-sys = { version = "0.7", path = "../occt-sys", optional = true }
 
 [build-dependencies]
 cmake = "0.1"
 cxx-build = "1"
-occt-sys = { version = "0.6", optional = true }
+occt-sys = { version = "0.7", path = "../occt-sys", optional = true }
 
 [features]
-builtin = ["occt-sys"]
+builtin = ["dep:occt-sys"]

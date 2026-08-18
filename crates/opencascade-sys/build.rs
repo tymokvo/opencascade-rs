@@ -1,7 +1,17 @@
-/// Minimum compatible version of OpenCASCADE library (major, minor)
-///
-/// Pre-installed OpenCASCADE library will be checked for compatibility using semver rules.
-const OCCT_VERSION: (u8, u8) = (7, 8);
+mod build_support;
+
+use std::env;
+
+#[cfg(not(feature = "builtin"))]
+use std::fs;
+#[cfg(feature = "builtin")]
+use std::path::PathBuf;
+
+#[cfg(not(feature = "builtin"))]
+use build_support::parse_detector_config;
+#[cfg(feature = "builtin")]
+use build_support::parse_version;
+use build_support::{validate_version, OcctConfig};
 
 /// The list of used OpenCASCADE libraries which needs to be linked with.
 const OCCT_LIBS: &[&str] = &[
@@ -33,7 +43,7 @@ const OCCT_LIBS: &[&str] = &[
 ];
 
 fn main() {
-    let target = std::env::var("TARGET").expect("No TARGET environment variable defined");
+    let target = env::var("TARGET").expect("No TARGET environment variable defined");
     let is_windows = target.to_lowercase().contains("windows");
     let is_windows_gnu = target.to_lowercase().contains("windows-gnu");
 
@@ -60,8 +70,8 @@ fn main() {
         build.flag("/EHsc");
     }
 
-    if let "windows" = std::env::consts::OS {
-        let current = std::env::current_dir().unwrap();
+    if let "windows" = env::consts::OS {
+        let current = env::current_dir().unwrap();
         build.include(current.parent().unwrap());
     }
 
@@ -73,77 +83,106 @@ fn main() {
         .include("include")
         .compile("wrapper");
 
-    println!("cargo:rustc-link-lib=static=wrapper");
-
     println!("cargo:rerun-if-changed=src/lib.rs");
     println!("cargo:rerun-if-changed=include/wrapper.hxx");
 }
 
-struct OcctConfig {
-    include_dir: std::path::PathBuf,
-    library_dir: std::path::PathBuf,
-    is_dynamic: bool,
-}
-
 impl OcctConfig {
-    /// Find OpenCASCADE library using cmake
     fn detect() -> Self {
-        println!("cargo:rerun-if-env-changed=DEP_OCCT_ROOT");
-
-        // Add path to builtin OCCT
         #[cfg(feature = "builtin")]
         {
-            occt_sys::build_occt();
-            std::env::set_var("DEP_OCCT_ROOT", occt_sys::occt_path().as_os_str());
+            Self::from_builtin_metadata()
         }
-
-        let dst =
-            std::panic::catch_unwind(|| cmake::Config::new("OCCT").register_dep("occt").build());
-
-        #[cfg(feature = "builtin")]
-        let dst = dst.expect("Builtin OpenCASCADE library not found.");
 
         #[cfg(not(feature = "builtin"))]
-        let dst = dst.expect("Pre-installed OpenCASCADE library not found. You can use `builtin` feature if you do not want to install OCCT libraries system-wide.");
-
-        let cfg = std::fs::read_to_string(dst.join("share").join("occ_info.txt"))
-            .expect("Something went wrong when detecting OpenCASCADE library.");
-
-        let mut version_major: Option<u8> = None;
-        let mut version_minor: Option<u8> = None;
-        let mut include_dir: Option<std::path::PathBuf> = None;
-        let mut library_dir: Option<std::path::PathBuf> = None;
-        let mut is_dynamic: bool = false;
-
-        for line in cfg.lines() {
-            if let Some((var, val)) = line.split_once('=') {
-                match var {
-                    "VERSION_MAJOR" => version_major = val.parse().ok(),
-                    "VERSION_MINOR" => version_minor = val.parse().ok(),
-                    "INCLUDE_DIR" => include_dir = val.parse().ok(),
-                    "LIBRARY_DIR" => library_dir = val.parse().ok(),
-                    "BUILD_SHARED_LIBS" => is_dynamic = val == "ON",
-                    _ => (),
-                }
-            }
-        }
-
-        if let (Some(version_major), Some(version_minor), Some(include_dir), Some(library_dir)) =
-            (version_major, version_minor, include_dir, library_dir)
         {
-            if version_major != OCCT_VERSION.0 || version_minor < OCCT_VERSION.1 {
-                #[cfg(feature = "builtin")]
-                panic!("Builtin OpenCASCADE library found but version is not met (found {}.{} but {}.{} required). Please fix OCCT_VERSION in build script of `opencascade-sys` crate or submodule OCCT in `occt-sys` crate.",
-                       version_major, version_minor, OCCT_VERSION.0, OCCT_VERSION.1);
-
-                #[cfg(not(feature = "builtin"))]
-                panic!("Pre-installed OpenCASCADE library found but version is not met (found {}.{} but {}.{} required). Please provide required version or use `builtin` feature.",
-                       version_major, version_minor, OCCT_VERSION.0, OCCT_VERSION.1);
-            }
-
-            Self { include_dir, library_dir, is_dynamic }
-        } else {
-            panic!("OpenCASCADE library found but something wrong with config.");
+            Self::from_preinstalled_package()
         }
     }
+
+    #[cfg(feature = "builtin")]
+    fn from_builtin_metadata() -> Self {
+        for key in ["ROOT", "INCLUDE", "LIB", "CMAKE", "VERSION", "LINK_KIND"] {
+            println!("cargo:rerun-if-env-changed=DEP_OCCT_{key}");
+        }
+
+        let root = required_metadata_path("ROOT");
+        let include_dir = required_metadata_path("INCLUDE");
+        let library_dir = required_metadata_path("LIB");
+        let cmake_dir = required_metadata_path("CMAKE");
+        let version_text = required_metadata("VERSION");
+        let link_kind = required_metadata("LINK_KIND");
+
+        require_directory(&root, "DEP_OCCT_ROOT");
+        require_directory(&include_dir, "DEP_OCCT_INCLUDE");
+        require_directory(&library_dir, "DEP_OCCT_LIB");
+        require_directory(&cmake_dir, "DEP_OCCT_CMAKE");
+        require_file(&include_dir.join("Standard.hxx"), "bundled OCCT header");
+        require_file(&cmake_dir.join("OpenCASCADEConfig.cmake"), "bundled OCCT CMake config");
+
+        for (name, path) in [("DEP_OCCT_INCLUDE", &include_dir), ("DEP_OCCT_LIB", &library_dir)] {
+            assert!(
+                path.starts_with(&root),
+                "{name} ({}) must be inside DEP_OCCT_ROOT ({})",
+                path.display(),
+                root.display()
+            );
+        }
+
+        let version = parse_version(&version_text)
+            .unwrap_or_else(|error| panic!("invalid DEP_OCCT_VERSION: {error}"));
+        validate_version(version)
+            .unwrap_or_else(|error| panic!("Builtin OpenCASCADE version is incompatible: {error}. Please fix the OCCT version requirement in `opencascade-sys` or the bundled OCCT revision in `occt-sys`."));
+
+        let is_dynamic = match link_kind.as_str() {
+            "static" => false,
+            "dylib" => true,
+            _ => panic!("DEP_OCCT_LINK_KIND must be `static` or `dylib`, found {link_kind:?}"),
+        };
+
+        Self { include_dir, library_dir, is_dynamic }
+    }
+
+    #[cfg(not(feature = "builtin"))]
+    fn from_preinstalled_package() -> Self {
+        println!("cargo:rerun-if-env-changed=DEP_OCCT_ROOT");
+
+        let dst = std::panic::catch_unwind(|| cmake::Config::new("OCCT").register_dep("occt").build())
+            .expect("Pre-installed OpenCASCADE library not found. You can use `builtin` feature if you do not want to install OCCT libraries system-wide.");
+
+        let config_path = dst.join("share").join("occ_info.txt");
+        let contents = fs::read_to_string(&config_path).unwrap_or_else(|error| {
+            panic!("failed to read OpenCASCADE detector output {}: {error}", config_path.display())
+        });
+        let (config, version) = parse_detector_config(&contents).unwrap_or_else(|error| {
+            panic!("invalid OpenCASCADE detector output {}: {error}", config_path.display())
+        });
+        validate_version(version).unwrap_or_else(|error| {
+            panic!("Pre-installed OpenCASCADE version is incompatible: {error}. Please provide the required version or use the `builtin` feature.")
+        });
+        config
+    }
+}
+
+#[cfg(feature = "builtin")]
+fn required_metadata(key: &str) -> String {
+    let variable = format!("DEP_OCCT_{key}");
+    env::var(&variable).unwrap_or_else(|_| {
+        panic!("missing {variable}; the `occt-sys` artifact contract is incomplete")
+    })
+}
+
+#[cfg(feature = "builtin")]
+fn required_metadata_path(key: &str) -> PathBuf {
+    PathBuf::from(required_metadata(key))
+}
+
+#[cfg(feature = "builtin")]
+fn require_directory(path: &std::path::Path, name: &str) {
+    assert!(path.is_dir(), "{name} is not a directory: {}", path.display());
+}
+
+#[cfg(feature = "builtin")]
+fn require_file(path: &std::path::Path, name: &str) {
+    assert!(path.is_file(), "{name} is missing: {}", path.display());
 }
