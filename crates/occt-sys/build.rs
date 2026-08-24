@@ -103,5 +103,4 @@ fn main() {
     // Tell rust-lld where to link to the native libraries that we built.
     println!("cargo:rustc-link-search=native={}/{}", install_dir.display(), OcctSysBuild::LIB_DIR);
     println!("cargo:rustc-link-lib=static={}", OcctSysBuild::LINK_NAME);
-    println!("cargo::metadata=ROOT={}", OcctSysBuild::LINK_NAME);
 }
