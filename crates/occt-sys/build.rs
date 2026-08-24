@@ -7,6 +7,11 @@ use std::{env, path::PathBuf};
 /// on to other consumers of the underlying native package.
 struct OcctSysBuild {}
 impl OcctSysBuild {
+    // The name of the link owned by this rust package. Should match the
+    // `package.links` property of Cargo.toml
+    const LINK_NAME: &str = "occt";
+    const OCCT_DIR: &str = "OCCT";
+    const PATCH_DIR: &str = "patch";
     // Paths in the package's `install_dir` at which to add headers, binaries, and
     // cmake files
     const INCLUDE_DIR: &str = "include";
@@ -14,23 +19,53 @@ impl OcctSysBuild {
     const CMAKE_DIR: &str = "lib/cmake/opencascade";
 }
 
+/// Emit metadata for this package to trigger re-runs on native, patch, and
+/// build source changes.
+fn emit_rerun_meta() {
+    println!("cargo::rerun-if-changed={}", OcctSysBuild::OCCT_DIR);
+    println!("cargo::rerun-if-changed={}", OcctSysBuild::PATCH_DIR);
+    println!("cargo::rerun-if-changed=build.rs");
+
+    // Re-run if the host c/cpp build vars change.
+    for variable in [
+        "CC",
+        "CXX",
+        "CFLAGS",
+        "CXXFLAGS",
+        "AR",
+        "CMAKE",
+        "CMAKE_GENERATOR",
+        "CMAKE_GENERATOR_PLATFORM",
+        "CMAKE_GENERATOR_TOOLSET",
+        "CMAKE_PREFIX_PATH",
+        "CMAKE_TOOLCHAIN_FILE",
+        "HOST",
+        "TARGET",
+        "PROFILE",
+    ] {
+        println!("cargo::rerun-if-env-changed={variable}");
+    }
+}
+
 fn main() {
+    emit_rerun_meta();
+
     // Get this crate's path
     let manifest_dir = PathBuf::from(
         env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR is not defined"),
     );
 
     // Get the path to the OCCT submodule
-    let source_dir = manifest_dir.join("OCCT");
+    let source_dir = manifest_dir.join(OcctSysBuild::OCCT_DIR);
 
     // Get the path to the patches directory
-    let patch_dir = manifest_dir.join("patch");
+    let patch_dir = manifest_dir.join(OcctSysBuild::PATCH_DIR);
 
     // Get the output directory for this package (configured by cargo)
     let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR is not defined"));
 
     // Get a path at which to install native library files
-    let install_dir = out_dir.join("occt");
+    let install_dir = out_dir.join(OcctSysBuild::LINK_NAME);
 
     let config = {
         // Configure cmake for building the native library
@@ -64,4 +99,9 @@ fn main() {
             .out_dir(&install_dir)
             .build()
     };
+
+    // Tell rust-lld where to link to the native libraries that we built.
+    println!("cargo:rustc-link-search=native={}/{}", install_dir.display(), OcctSysBuild::LIB_DIR);
+    println!("cargo:rustc-link-lib=static={}", OcctSysBuild::LINK_NAME);
+    println!("cargo::metadata=ROOT={}", OcctSysBuild::LINK_NAME);
 }
