@@ -25,5 +25,5 @@ exclude = [
     "OCCT/src/QABugs/*",
 ]
 
-[dependencies]
+[build-dependencies]
 cmake = "0.1"
