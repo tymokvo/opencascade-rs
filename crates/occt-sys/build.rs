@@ -116,40 +116,53 @@ fn main() {
     // Tell rust-lld where to link to the native libraries that we built.
     println!("cargo::rustc-link-search=native={}", out_lib.display());
 
-    // HACK: This is stolen from the existing build scripts.
-    // Really, we need to use the system archiving tools to link these properly
+    {
+        // ==== Linking zone ====
 
-    // Every line here corresponds to a `{lib}.a` file that is built by cmake.
-    // Linking these in the wrong order can cause linker errors down the line.
-    const OCCT_LIBS: &[&str] = &[
-        "TKMath",
-        "TKernel",
-        "TKDE",
-        "TKFeat",
-        "TKGeomBase",
-        "TKG2d",
-        "TKG3d",
-        "TKTopAlgo",
-        "TKGeomAlgo",
-        "TKBRep",
-        "TKPrim",
-        "TKDESTEP",
-        "TKDEIGES",
-        "TKDESTL",
-        "TKMesh",
-        "TKHLR",
-        "TKShHealing",
-        "TKFillet",
-        "TKBool",
-        "TKBO",
-        "TKOffset",
-        "TKXSBase",
-        "TKCAF",
-        "TKLCAF",
-        "TKXCAF",
-    ];
+        // NOTE: This is an extreme hack to integrate
+        // with the higher-level `cxx-build` process.
 
-    for lib in OCCT_LIBS {
-        println!("cargo::rustc-link-lib=static={}", lib);
+        // HACK: This is stolen from the existing build scripts.
+        // Really, we need to use the system archiving tools to link these properly
+
+        // Every line here corresponds to a `{lib}.a` file that is built by cmake.
+        // Linking these in the wrong order can cause linker errors down the line.
+        const OCCT_LIBS: &[&str] = &[
+            "TKMath",
+            "TKernel",
+            "TKDE",
+            "TKFeat",
+            "TKGeomBase",
+            "TKG2d",
+            "TKG3d",
+            "TKTopAlgo",
+            "TKGeomAlgo",
+            "TKBRep",
+            "TKPrim",
+            "TKDESTEP",
+            "TKDEIGES",
+            "TKDESTL",
+            "TKMesh",
+            "TKHLR",
+            "TKShHealing",
+            "TKFillet",
+            "TKBool",
+            "TKBO",
+            "TKOffset",
+            "TKXSBase",
+            "TKCAF",
+            "TKLCAF",
+            "TKXCAF",
+        ];
+
+        for lib in OCCT_LIBS {
+            println!("cargo::rustc-link-lib=static={}", lib);
+        }
+
+        // Pack all the linked libraries into a string. We will str::split and
+        // re-link for cxx at the next level.
+        let linklibs = OCCT_LIBS.join(",");
+
+        println!("cargo::metadata=linklibs={}", linklibs);
     }
 }

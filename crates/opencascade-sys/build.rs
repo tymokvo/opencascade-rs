@@ -22,37 +22,10 @@ fn main() {
         build.include(current.parent().unwrap());
     }
 
-    // HACK: Ultra-hack. This re-emits the link lines for cxx to link properly.
-    // Can pass through cargo metadata?
-    const OCCT_LIBS: &[&str] = &[
-        "TKMath",
-        "TKernel",
-        "TKDE",
-        "TKFeat",
-        "TKGeomBase",
-        "TKG2d",
-        "TKG3d",
-        "TKTopAlgo",
-        "TKGeomAlgo",
-        "TKBRep",
-        "TKPrim",
-        "TKDESTEP",
-        "TKDEIGES",
-        "TKDESTL",
-        "TKMesh",
-        "TKHLR",
-        "TKShHealing",
-        "TKFillet",
-        "TKBool",
-        "TKBO",
-        "TKOffset",
-        "TKXSBase",
-        "TKCAF",
-        "TKLCAF",
-        "TKXCAF",
-    ];
-
-    for lib in OCCT_LIBS {
+    let linklibs = std::env::var("DEP_OCCT_LINKLIBS").expect(
+        "occt-sys needs to pass `cargo::metadata=linklibs=TKernel,TKMath,...` for cxx to link",
+    );
+    for lib in linklibs.split(",") {
         println!("cargo::rustc-link-lib=static={}", lib);
     }
 
