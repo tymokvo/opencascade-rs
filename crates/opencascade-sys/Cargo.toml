@@ -12,7 +12,6 @@ cxx = "1"
 occt-sys = { path = "../occt-sys" }
 
 [build-dependencies]
-cmake = "0.1"
 cxx-build = "1"
 
 [features]
